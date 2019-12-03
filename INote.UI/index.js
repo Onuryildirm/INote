@@ -57,7 +57,6 @@ app.controller("indexCtrl", function ($scope, $window, $http, $location) {
 
     $scope.logout = function (e) {
         e.preventDefault();
-
         $scope.setLoggedInUser(null);
 
         $http.post(apiUrl + "api/Account/Logout", null, $scope.requestConfig()).then(
@@ -94,6 +93,7 @@ app.controller("mainCtrl", function ($scope, $http, $window, $location) {
     }
 
     $scope.selectedNote = null;
+
     $scope.activeNote = {
         Id: 0,
         Title: "",
@@ -117,8 +117,23 @@ app.controller("mainCtrl", function ($scope, $http, $window, $location) {
         );
     };
 
+    $scope.newNote = function (e) {
+        if (e)
+            e.preventDefault();
+
+        $scope.selectedNote = null;
+
+        $scope.activeNote = {
+            Id: 0,
+            Title: "",
+            Content: ""
+        };
+    };
+
     $scope.showNote = function (e, note) {
-        e.preventDefault();
+        if (e)
+            e.preventDefault();
+
         $scope.activeNote = angular.copy(note);
         $scope.selectedNote = note;
     };
@@ -126,12 +141,24 @@ app.controller("mainCtrl", function ($scope, $http, $window, $location) {
     $scope.saveNote = function (e) {
         e.preventDefault();
         if ($scope.activeNote.Id !== 0) {
-            $http.put(apiUrl + "api/Notes/PutNote/" + $scope.activeNote.Id, $scope.activeNote, $scope.requestConfig()).then(
+            $http.put(apiUrl + "api/Notes/PutNote/" + $scope.activeNote.Id, $scope.activeNote, $scope.requestConfig())
+                .then(
+                    function (response) {
+                        console.log(response.data);
+                        $scope.selectedNote.Title = response.data.Title;
+                        $scope.selectedNote.Content = response.data.Content;
+                        $scope.selectedNote.ModifiedTime = response.data.ModifiedTime;
+                    },
+                    function (response) {
+
+                    },
+                );
+        }
+        else {
+            $http.post(apiUrl + "api/Notes/PostNote/", $scope.activeNote, $scope.requestConfig()).then(
                 function (response) {
-                    console.log(response.data);
-                    $scope.selectedNote.Title = response.data.Title;
-                    $scope.selectedNote.Content = response.data.Content;
-                    $scope.selectedNote.ModifiedTime = response.data.ModifiedTime;
+                    $scope.notes.push(response.data);
+                    $scope.showNote(null, response.data);
                 },
                 function (response) {
 
@@ -141,7 +168,20 @@ app.controller("mainCtrl", function ($scope, $http, $window, $location) {
     };
 
     $scope.deleteNote = function (e) {
+        e.preventDefault();
 
+        if ($scope.selectedNote) {
+            $http.delete(apiUrl + "api/Notes/DeleteNote/" + $scope.selectedNote.Id, $scope.requestConfig()).then(
+                function (response) {
+                    var i = $scope.notes.indexOf($scope.selectedNote);
+                    $scope.notes.splice(i, 1);
+                    $scope.newNote();
+                },
+                function (response) {
+
+                },
+            );
+        }
     };
 
     $scope.noteActiveClass = function (id) {
