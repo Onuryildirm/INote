@@ -27,7 +27,7 @@
                             <input ng-model="activeNote.Title" type="text" class="form-control" placeholder="Başlık" />
                         </div>
                         <div class="form-group flex-grow-1">
-                            <textarea ng-model="activeNote.Content" type="text" class="form-control h-100" placeholder="Bir şeyler yazınız.."></textarea>
+                            <textarea ng-model="activeNote.Content" type="text" class="form-control h-100" placeholder="Bir şeyler yazınız.." style="white-space:nowrap"></textarea>
                         </div>
                         <div class="ml-auto">
                             <button ng-click="saveNote($event)" ng-disabled="!activeNote.Title" type="button" class="btn btn-primary" style="width:100px; height:40px">Kaydet</button>
